@@ -1,6 +1,7 @@
 package syntax.generator;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Production {
@@ -54,5 +55,18 @@ public class Production {
 
         return leftSide + " -> "
                 + rightSideString;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Production that = (Production) o;
+        return priority == that.priority;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(priority);
     }
 }

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Set;
 
 public class GSATest {
 
@@ -12,7 +13,7 @@ public class GSATest {
         GSA gsa = new GSA();
 
 
-        try(FileInputStream inputStream = new FileInputStream("./src/test/resources/example.txt")){
+        try(FileInputStream inputStream = new FileInputStream("./src/test/resources/simple-example.txt")){
             gsa.parseInput(inputStream);
         }
 
@@ -22,7 +23,7 @@ public class GSATest {
                 System.out.println(p);
             }
         }
-        System.out.println("------------- Productions -------------");
+        System.out.println("---------------------------------------");
 
         System.out.println();
 
@@ -33,17 +34,30 @@ public class GSATest {
             }
         }
         System.out.println();
-        System.out.println("------------ Empty symbols ------------");
+        System.out.println("---------------------------------------");
 
         System.out.println();
 
-        System.out.println("------------- Starts sets -------------");
+        System.out.println("------------- STARTS sets -------------");
         for(NonTerminalSymbol nonTerminalSymbol: gsa.getNonTerminalSymbols()){
             System.out.println("STARTS(" + nonTerminalSymbol + ") = " + nonTerminalSymbol.starts());
         }
-        System.out.println("------------- Starts sets -------------");
+        System.out.println("---------------------------------------");
         System.out.println();
 
+        System.out.println("--------------- States ----------------");
+        int i = 1;
+        for(Set<LR1Item> state: gsa.getStates()){
+
+            System.out.println("-- State " + i++ + " --");
+
+            for(LR1Item item: state){
+                System.out.println(item);
+            }
+            System.out.println("------------");
+            System.out.println();
+        }
+        System.out.println("---------------------------------------");
     }
 
 }

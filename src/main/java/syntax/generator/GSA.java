@@ -14,6 +14,10 @@ public class GSA {
 
     private NonTerminalSymbol firstNonTerminalSymbol;
 
+    private final Map<DKATransitionInput, Set<LR1Item>> dkaTransitions = new HashMap<>();
+
+    private List<Set<LR1Item>> states;
+
     private final static TerminalSymbol EOF_SYMBOL = new TerminalSymbol("!EOF!");
 
     public static void main(String... args) {
@@ -71,6 +75,10 @@ public class GSA {
 
         // Izracun skupova ZAPOCINJE
         calculateStartsSets();
+
+        // Izracun tranzicija DKA
+        calculateDKATransitions();
+
     }
 
     private void inputNonTerminalSymbols(Scanner sc) {
@@ -269,6 +277,60 @@ public class GSA {
 
     }
 
+    private void calculateDKATransitions() {
+        Set<Set<LR1Item>> stateSet = new HashSet<>();
+        List<Set<LR1Item>> statesToProcess = new ArrayList<>();
+
+        Set<LR1Item> firstState = new HashSet<>();
+        for(Production production: firstNonTerminalSymbol.getProductions()){
+            firstState.addAll(SAUtil.getAllEpsilonLR1Items(new LR1Item(production, Set.of(EOF_SYMBOL))));
+        }
+        statesToProcess.add(SAUtil.joinDuplicateLR1Items(firstState));
+
+        do{
+            Set<LR1Item> stateToProcess = statesToProcess.get(0);
+            statesToProcess.remove(0);
+
+            Map<Symbol, Set<LR1Item>> symbolToOutput = new HashMap<>();
+
+            for(LR1Item stateItem: stateToProcess){
+                if(!stateItem.getProduction().isEpsilon() &&
+                        stateItem.getDotPosition() < stateItem.getProduction().getRightSide().size()){
+
+                    Symbol nextSymbol = stateItem.getProduction().getRightSide().get(stateItem.getDotPosition());
+
+                    Set<LR1Item> transitionOutput = symbolToOutput.getOrDefault(nextSymbol, new HashSet<>());
+
+                    transitionOutput.addAll(SAUtil.getAllEpsilonLR1Items(
+                            new LR1Item(stateItem.getProduction(),
+                            stateItem.getFollowingSymbols(),
+                            stateItem.getDotPosition() + 1)));
+
+                    symbolToOutput.put(nextSymbol, transitionOutput);
+                }
+            }
+
+            for(var entry: symbolToOutput.entrySet()){
+                Symbol symbol = entry.getKey();
+                Set<LR1Item> stateOutput = entry.getValue();
+
+                stateOutput = SAUtil.joinDuplicateLR1Items(stateOutput);
+
+                if(!stateSet.contains(stateOutput)){
+                    statesToProcess.add(stateOutput);
+                    stateSet.add(stateOutput);
+                    System.out.println(stateSet.size());
+                }
+
+                dkaTransitions.put(new DKATransitionInput(stateToProcess, symbol), stateOutput);
+            }
+
+            //DKATransitionInput transitionInput = new DKATransitionInput(stateToProcess, nextSymbol);
+
+        } while (statesToProcess.size() != 0);
+
+    }
+
     public Set<TerminalSymbol> getTerminalSymbols() {
         return terminalSymbols;
     }
@@ -291,5 +353,12 @@ public class GSA {
 
     public NonTerminalSymbol getNonTerminalSymbol(String name){
         return (NonTerminalSymbol) symbols.get(name);
+    }
+
+    public Set<Set<LR1Item>> getStates() {
+        Collection<Set<LR1Item>> valueSet = dkaTransitions.values();
+        Set<Set<LR1Item>> result = dkaTransitions.keySet().stream().map(DKATransitionInput::getState).collect(Collectors.toSet());
+        result.addAll(valueSet);
+        return result;
     }
 }
