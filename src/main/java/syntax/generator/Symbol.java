@@ -1,10 +1,12 @@
 package syntax.generator;
 
 import java.util.Objects;
+import java.util.Set;
 
 public abstract class Symbol {
 
     private final String name;
+
 
     protected Symbol(String name) {
         this.name = name;
@@ -13,6 +15,12 @@ public abstract class Symbol {
     public String getName() {
         return name;
     }
+
+    public abstract Set<Symbol> immediatelyStartsWith();
+
+    public abstract Set<Symbol> startsWith();
+
+    public abstract Set<TerminalSymbol> starts();
 
     @Override
     public boolean equals(Object o) {
@@ -31,4 +39,5 @@ public abstract class Symbol {
     public String toString() {
         return name;
     }
+
 }

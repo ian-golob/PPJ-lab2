@@ -16,6 +16,34 @@ public class GSATest {
             gsa.parseInput(inputStream);
         }
 
+        System.out.println("------------- Productions -------------");
+        for(NonTerminalSymbol nonTerminalSymbol: gsa.getNonTerminalSymbols()){
+            for(Production p: nonTerminalSymbol.getProductions()){
+                System.out.println(p);
+            }
+        }
+        System.out.println("------------- Productions -------------");
+
+        System.out.println();
+
+        System.out.println("------------ Empty symbols ------------");
+        for(NonTerminalSymbol symbol: gsa.getNonTerminalSymbols()){
+            if(symbol.isEmptySymbol()){
+                System.out.print(symbol);
+            }
+        }
+        System.out.println();
+        System.out.println("------------ Empty symbols ------------");
+
+        System.out.println();
+
+        System.out.println("------------- Starts sets -------------");
+        for(NonTerminalSymbol nonTerminalSymbol: gsa.getNonTerminalSymbols()){
+            System.out.println("STARTS(" + nonTerminalSymbol + ") = " + nonTerminalSymbol.starts());
+        }
+        System.out.println("------------- Starts sets -------------");
+        System.out.println();
+
     }
 
 }

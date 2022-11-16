@@ -2,21 +2,24 @@ package syntax.generator;
 
 import java.io.InputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GSA {
 
-    private Map<String, TerminalSymbol> terminalSymbols;
+    private final Set<TerminalSymbol> terminalSymbols = new HashSet<>();
 
-    private Map<String, NonTerminalSymbol> nonTerminalSymbols;
+    private final Set<NonTerminalSymbol> nonTerminalSymbols = new HashSet<>();
 
-    private Map<String, Symbol> symbols;
+    private final Map<String, Symbol> symbols = new HashMap<>();
 
     private NonTerminalSymbol firstNonTerminalSymbol;
+
+    private final static TerminalSymbol EOF_SYMBOL = new TerminalSymbol("!EOF!");
 
     public static void main(String... args) {
         GSA gla = new GSA();
         gla.parseInput(System.in);
-        //gla.writeLAConfigObjects();
+        //gsa.writeSAConfigObjects();
     }
 
     /*
@@ -45,24 +48,29 @@ public class GSA {
     public void parseInput(InputStream in) {
         Scanner sc = new Scanner(in);
 
+        // Parsiranje nezavrsnih znakova
         inputNonTerminalSymbols(sc);
 
+        // Parsiranje zavrsnih znakova
         inputTerminalSymbols(sc);
 
+        // Parsiranje sinkronizacijskih znakova
         inputSyncSymbols(sc);
 
-        symbols = new HashMap<>();
-
-        symbols.putAll(nonTerminalSymbols);
-        symbols.putAll(terminalSymbols);
-        
+        // Parsiranje produkcija
         inputProductions(sc);
 
-        for(NonTerminalSymbol nonTerminalSymbol: nonTerminalSymbols.values()){
-            for(Production p: nonTerminalSymbol.getProductions()){
-                System.out.println(p);
-            }
-        }
+        // Izracun praznih simbola
+        calculateEmptySymbols();
+
+        // Izracun skupova ZapocinjeIzravnoZnakom
+        calculateImmediatelyStartsWithSets();
+
+        // Izracun skupova ZapocinjeZnakom
+        calculateStartsWithSets();
+
+        // Izracun skupova ZAPOCINJE
+        calculateStartsSets();
     }
 
     private void inputNonTerminalSymbols(Scanner sc) {
@@ -72,13 +80,14 @@ public class GSA {
             throw new IllegalArgumentException("\"%V\" expected");
         }
 
-        nonTerminalSymbols = new HashMap<>();
-
         for(int i = 1; i < names.length; i++) {
-            nonTerminalSymbols.put(names[i], new NonTerminalSymbol(names[i]));
+            NonTerminalSymbol symbol = new NonTerminalSymbol(names[i]);
+
+            nonTerminalSymbols.add(symbol);
+            symbols.put(names[i], symbol);
         }
 
-        firstNonTerminalSymbol = nonTerminalSymbols.get(names[1]);
+        firstNonTerminalSymbol = getNonTerminalSymbol(names[1]);
     }
 
     private void inputTerminalSymbols(Scanner sc) {
@@ -88,10 +97,11 @@ public class GSA {
             throw new IllegalArgumentException("\"%T\" expected");
         }
 
-        terminalSymbols = new HashMap<>();
-
         for(int i = 1; i < names.length; i++) {
-            terminalSymbols.put(names[i], new TerminalSymbol(names[i]));
+            TerminalSymbol symbol = new TerminalSymbol(names[i]);
+
+            terminalSymbols.add(symbol);
+            symbols.put(names[i], symbol);
         }
     }
 
@@ -103,14 +113,14 @@ public class GSA {
         }
 
         for(int i = 1; i < names.length; i++) {
-            terminalSymbols.get(names[i]).setIsSyncSymbol(true);
+            getTerminalSymbol(names[i]).setIsSyncSymbol(true);
         }
     }
 
     private void inputProductions(Scanner sc) {
 
         String firstLeftSide = sc.nextLine();
-        NonTerminalSymbol leftSide = nonTerminalSymbols.get(firstLeftSide);
+        NonTerminalSymbol leftSide = getNonTerminalSymbol(firstLeftSide);
 
         int priority = 1;
 
@@ -120,7 +130,7 @@ public class GSA {
 
             if(line.startsWith("<")){
 
-                leftSide = nonTerminalSymbols.get(line);
+                leftSide = getNonTerminalSymbol(line);
 
             } else if(line.startsWith(" $")){
 
@@ -130,8 +140,7 @@ public class GSA {
             } else {
 
                 List<Symbol> rightSide = Arrays.stream(line.substring(1).split(" "))
-                        .map(name ->
-                            symbols.get(name))
+                        .map(symbols::get)
                         .toList();
 
                 Production production = new Production(priority++, leftSide, rightSide);
@@ -143,4 +152,144 @@ public class GSA {
 
     }
 
+    private void calculateEmptySymbols() {
+
+        int emptySymbolCount = 0;
+
+        for(NonTerminalSymbol symbol: nonTerminalSymbols){
+            for(Production production: symbol.getProductions()) {
+                if (production.isEpsilon()) {
+                    symbol.setIsEmptySymbol(true);
+                    emptySymbolCount++;
+                }
+            }
+        }
+
+        int newEmptySymbolCount;
+
+        do{
+            newEmptySymbolCount = 0;
+
+            for(NonTerminalSymbol symbol: nonTerminalSymbols){
+
+                if(!symbol.isEmptySymbol()){
+
+                    for(Production production: symbol.getProductions()) {
+
+                        if (SAUtil.isEmptyProduction(production)) {
+                            symbol.setIsEmptySymbol(true);
+                            newEmptySymbolCount++;
+                        }
+
+                    }
+
+                }
+
+            }
+
+        } while(newEmptySymbolCount != 0);
+    }
+
+    private void calculateImmediatelyStartsWithSets() {
+
+        if(firstNonTerminalSymbol.isEmptySymbol()){
+            firstNonTerminalSymbol.immediatelyStartsWith().add(EOF_SYMBOL);
+        }
+
+        for(NonTerminalSymbol symbol: nonTerminalSymbols){
+            for(Production production: symbol.getProductions()){
+                if(production.isEpsilon()){
+                    continue;
+                }
+
+                for(Symbol productionSymbol: production.getRightSide()){
+
+                    symbol.immediatelyStartsWith().add(productionSymbol);
+
+                    if(productionSymbol instanceof NonTerminalSymbol){
+                        if(!((NonTerminalSymbol) productionSymbol).isEmptySymbol()){
+                            break;
+                        }
+
+                    } else {
+                        break;
+                    }
+
+                }
+            }
+        }
+
+    }
+
+    private void calculateStartsWithSets() {
+
+        for(NonTerminalSymbol symbol: nonTerminalSymbols){
+            symbol.startsWith().addAll(symbol.immediatelyStartsWith());
+        }
+
+
+        boolean someSetChanged;
+        do {
+            someSetChanged = false;
+
+            for(NonTerminalSymbol symbol: nonTerminalSymbols){
+
+                Set<Symbol> newStartsWith = new HashSet<>(symbol.startsWith());
+
+                for(Symbol startsWithSymbol: symbol.startsWith()){
+
+                    if(startsWithSymbol instanceof NonTerminalSymbol){
+                        if(newStartsWith.addAll(startsWithSymbol.startsWith())){
+                            someSetChanged = true;
+                        }
+                    }
+
+                }
+
+                if(someSetChanged){
+                    symbol.startsWith().addAll(newStartsWith);
+                }
+
+            }
+
+        } while(someSetChanged);
+
+    }
+
+    private void calculateStartsSets() {
+
+        for(NonTerminalSymbol symbol: nonTerminalSymbols){
+            symbol.starts().addAll(
+                    symbol.startsWith()
+                            .stream()
+                            .filter(tmpSymbol -> tmpSymbol instanceof TerminalSymbol)
+                            .map(tmpSymbol -> (TerminalSymbol) tmpSymbol)
+                            .collect(Collectors.toSet()));
+        }
+
+    }
+
+    public Set<TerminalSymbol> getTerminalSymbols() {
+        return terminalSymbols;
+    }
+
+    public Set<NonTerminalSymbol> getNonTerminalSymbols() {
+        return nonTerminalSymbols;
+    }
+
+    public Map<String, Symbol> getSymbols() {
+        return symbols;
+    }
+
+    public NonTerminalSymbol getFirstNonTerminalSymbol() {
+        return firstNonTerminalSymbol;
+    }
+
+    public TerminalSymbol getTerminalSymbol(String name){
+        return (TerminalSymbol) symbols.get(name);
+    }
+
+    public NonTerminalSymbol getNonTerminalSymbol(String name){
+        return (NonTerminalSymbol) symbols.get(name);
+    }
 }
