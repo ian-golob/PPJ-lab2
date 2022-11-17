@@ -4,6 +4,8 @@ import syntax.analyzer.*;
 import syntax.common.*;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -39,9 +41,9 @@ public class GSA {
                 firstNonTerminalSymbol,
                 dkaActionTable,
                 dkaNewStateTable);
-
         File file = new File("./analizator/saConfigObject.obj");
 
+        Files.createDirectories(Paths.get("analizator/"));
         file.createNewFile();
 
         try(ObjectOutputStream configOut =
