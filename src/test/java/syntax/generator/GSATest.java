@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GSATest {
 
@@ -70,9 +71,9 @@ public class GSATest {
 
          */
 
-        List<TerminalSymbol> terminalSymbolList = new ArrayList<>(gsa.getTerminalSymbols().stream().toList());
+        List<TerminalSymbol> terminalSymbolList = new ArrayList<>(gsa.getTerminalSymbols());
         terminalSymbolList.add(GSA.EOF_SYMBOL);
-        List<NonTerminalSymbol> nonTerminalSymbolList = gsa.getNonTerminalSymbols().stream().toList();
+        List<NonTerminalSymbol> nonTerminalSymbolList = new ArrayList<>(gsa.getNonTerminalSymbols());
 
 
         int fieldLength = 6;

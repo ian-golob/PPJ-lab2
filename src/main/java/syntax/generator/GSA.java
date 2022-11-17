@@ -155,7 +155,7 @@ public class GSA {
 
                 List<Symbol> rightSide = Arrays.stream(line.substring(1).split(" "))
                         .map(symbols::get)
-                        .toList();
+                        .collect(Collectors.toList());
 
                 Production production = new Production(priority++, leftSide, rightSide);
                 leftSide.getProductions().add(production);
@@ -336,7 +336,7 @@ public class GSA {
     }
 
     private void calculateDKATables() {
-        List<TerminalSymbol> terminalSymbolList = new ArrayList<>(terminalSymbols.stream().toList());
+        List<TerminalSymbol> terminalSymbolList = new ArrayList<>(terminalSymbols);
         terminalSymbolList.add(EOF_SYMBOL);
 
         for(int i = 0; i < states.size(); i++){
@@ -385,8 +385,7 @@ public class GSA {
             }
         }
 
-
-        List<NonTerminalSymbol> nonTerminalSymbolList = nonTerminalSymbols.stream().toList();
+        List<NonTerminalSymbol> nonTerminalSymbolList = new ArrayList<>(nonTerminalSymbols);
         for(int i = 0; i < states.size(); i++){
             for(int j = 0; j < nonTerminalSymbolList.size(); j ++){
                 Set<LR1Item> state = states.get(i);
