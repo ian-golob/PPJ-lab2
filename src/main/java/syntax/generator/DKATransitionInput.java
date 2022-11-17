@@ -1,5 +1,7 @@
 package syntax.generator;
 
+import syntax.common.Symbol;
+
 import java.util.Objects;
 import java.util.Set;
 

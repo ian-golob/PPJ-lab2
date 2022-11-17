@@ -1,6 +1,7 @@
 package syntax.generator;
 
 import syntax.analyzer.*;
+import syntax.common.*;
 
 import java.io.*;
 import java.util.*;
@@ -186,7 +187,7 @@ public class GSA {
 
                     for(Production production: symbol.getProductions()) {
 
-                        if (SAUtil.isEmptyProduction(production)) {
+                        if (GSAUtil.isEmptyProduction(production)) {
                             symbol.setIsEmptySymbol(true);
                             newEmptySymbolCount++;
                         }
@@ -285,9 +286,9 @@ public class GSA {
 
         Set<LR1Item> firstState = new HashSet<>();
         for(Production production: firstNonTerminalSymbol.getProductions()){
-            firstState.addAll(SAUtil.getAllEpsilonLR1Items(new LR1Item(production, Set.of(EOF_SYMBOL))));
+            firstState.addAll(GSAUtil.getAllEpsilonLR1Items(new LR1Item(production, Set.of(EOF_SYMBOL))));
         }
-        firstState = SAUtil.joinDuplicateLR1Items(firstState);
+        firstState = GSAUtil.joinDuplicateLR1Items(firstState);
         statesToProcess.add(firstState);
         states.add(firstState);
 
@@ -305,7 +306,7 @@ public class GSA {
 
                     Set<LR1Item> transitionOutput = symbolToOutput.getOrDefault(nextSymbol, new HashSet<>());
 
-                    transitionOutput.addAll(SAUtil.getAllEpsilonLR1Items(
+                    transitionOutput.addAll(GSAUtil.getAllEpsilonLR1Items(
                             new LR1Item(stateItem.getProduction(),
                             stateItem.getFollowingSymbols(),
                             stateItem.getDotPosition() + 1)));
@@ -318,7 +319,7 @@ public class GSA {
                 Symbol symbol = entry.getKey();
                 Set<LR1Item> stateOutput = entry.getValue();
 
-                stateOutput = SAUtil.joinDuplicateLR1Items(stateOutput);
+                stateOutput = GSAUtil.joinDuplicateLR1Items(stateOutput);
 
                 if(!states.contains(stateOutput)){
                     statesToProcess.add(stateOutput);

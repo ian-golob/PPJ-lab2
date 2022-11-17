@@ -1,9 +1,12 @@
 package syntax.generator;
 
 import org.junit.jupiter.api.Test;
-import syntax.analyzer.Action;
+import syntax.common.Action;
 import syntax.analyzer.DKAActionInput;
 import syntax.analyzer.DKANewStateInput;
+import syntax.common.NonTerminalSymbol;
+import syntax.common.Production;
+import syntax.common.TerminalSymbol;
 
 import java.io.FileInputStream;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package syntax.generator;
+package syntax.common;
 
 import java.io.Serializable;
 import java.util.Objects;

@@ -1,8 +1,5 @@
-package syntax.analyzer;
-
-import syntax.generator.Production;
-
-public class ReduceAction extends Action{
+package syntax.common;
+public class ReduceAction extends Action {
 
     private final Production production;
 

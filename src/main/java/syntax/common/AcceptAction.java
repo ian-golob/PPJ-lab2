@@ -1,4 +1,4 @@
-package syntax.analyzer;
+package syntax.common;
 
 public class AcceptAction extends Action {
     public AcceptAction() {

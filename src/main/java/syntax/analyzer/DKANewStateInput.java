@@ -1,6 +1,6 @@
 package syntax.analyzer;
 
-import syntax.generator.NonTerminalSymbol;
+import syntax.common.NonTerminalSymbol;
 
 import java.io.Serializable;
 import java.util.Objects;

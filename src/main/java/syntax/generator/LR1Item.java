@@ -1,5 +1,8 @@
 package syntax.generator;
 
+import syntax.common.Production;
+import syntax.common.TerminalSymbol;
+
 import java.util.Objects;
 import java.util.Set;
 

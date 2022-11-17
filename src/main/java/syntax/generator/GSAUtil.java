@@ -1,9 +1,14 @@
 package syntax.generator;
 
+import syntax.common.NonTerminalSymbol;
+import syntax.common.Production;
+import syntax.common.Symbol;
+import syntax.common.TerminalSymbol;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
-public abstract class SAUtil {
+public abstract class GSAUtil {
 
     /**
      * Evaluates if all the given symbols are non-terminal and empty.

@@ -1,8 +1,9 @@
 package syntax.analyzer;
 
-import syntax.generator.NonTerminalSymbol;
-import syntax.generator.Symbol;
-import syntax.generator.TerminalSymbol;
+import syntax.common.Action;
+import syntax.common.NonTerminalSymbol;
+import syntax.common.Symbol;
+import syntax.common.TerminalSymbol;
 
 import java.io.*;
 import java.nio.file.Path;

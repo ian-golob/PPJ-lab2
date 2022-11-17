@@ -1,6 +1,6 @@
 package syntax.analyzer;
 
-import syntax.generator.TerminalSymbol;
+import syntax.common.TerminalSymbol;
 
 import java.io.Serializable;
 import java.util.Objects;

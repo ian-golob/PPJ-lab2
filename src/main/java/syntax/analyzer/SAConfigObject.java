@@ -1,7 +1,8 @@
 package syntax.analyzer;
 
-import syntax.generator.NonTerminalSymbol;
-import syntax.generator.Symbol;
+import syntax.common.Action;
+import syntax.common.NonTerminalSymbol;
+import syntax.common.Symbol;
 
 import java.io.Serializable;
 import java.util.Map;

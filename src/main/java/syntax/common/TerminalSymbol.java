@@ -1,4 +1,4 @@
-package syntax.generator;
+package syntax.common;
 
 import java.util.Set;
 
