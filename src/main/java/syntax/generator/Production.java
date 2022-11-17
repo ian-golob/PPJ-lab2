@@ -1,10 +1,11 @@
 package syntax.generator;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class Production {
+public class Production implements Serializable {
 
     private final int priority;
 

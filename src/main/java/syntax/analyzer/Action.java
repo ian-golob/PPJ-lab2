@@ -1,6 +1,8 @@
 package syntax.analyzer;
 
-public abstract class Action {
+import java.io.Serializable;
+
+public abstract class Action  implements Serializable {
 
     private final ActionType type;
 

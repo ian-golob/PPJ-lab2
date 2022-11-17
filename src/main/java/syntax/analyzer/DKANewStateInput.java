@@ -2,9 +2,10 @@ package syntax.analyzer;
 
 import syntax.generator.NonTerminalSymbol;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class DKANewStateInput {
+public class DKANewStateInput implements Serializable {
 
     private final int state;
 

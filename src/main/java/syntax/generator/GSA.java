@@ -2,7 +2,7 @@ package syntax.generator;
 
 import syntax.analyzer.*;
 
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,34 +25,31 @@ public class GSA {
 
     public final static TerminalSymbol EOF_SYMBOL = new TerminalSymbol("!EOF!");
 
-    public static void main(String... args) {
+    public static void main(String... args) throws IOException {
         GSA gla = new GSA();
         gla.parseInput(System.in);
-        //gsa.writeSAConfigObjects();
+        gla.writeSAConfigObjects();
     }
 
-    /*
     public void writeSAConfigObjects() throws IOException {
-        String pathPrefix = "analizator/";
 
-        File analyzerStatesFile = new File(pathPrefix + "analyzerStates.obj");
-        File lexicalElementNamesFile = new File(pathPrefix + "lexicalElementNames.obj");
-        File stateToENKAListMapFile = new File(pathPrefix + "stateToENKAListMap.obj");
+        SAConfigObject saConfigObject = new SAConfigObject(
+                symbols,
+                firstNonTerminalSymbol,
+                dkaActionTable,
+                dkaNewStateTable);
 
-        analyzerStatesFile.createNewFile();
-        lexicalElementNamesFile.createNewFile();
-        stateToENKAListMapFile.createNewFile();
+        File file = new File("./analizator/saConfigObject.obj");
 
-        try(ObjectOutputStream analyzerStatesFileOut = new ObjectOutputStream(new FileOutputStream(analyzerStatesFile));
-            ObjectOutputStream lexicalElementNamesFileOut = new ObjectOutputStream(new FileOutputStream(lexicalElementNamesFile));
-            ObjectOutputStream stateToENKAListMapFileOut = new ObjectOutputStream(new FileOutputStream(stateToENKAListMapFile))){
+        file.createNewFile();
 
-            analyzerStatesFileOut.writeObject(analyzerStates);
-            lexicalElementNamesFileOut.writeObject(lexicalElementNames);
-            stateToENKAListMapFileOut.writeObject(stateToENKAListMap);
+        try(ObjectOutputStream configOut =
+                new ObjectOutputStream(
+                        new FileOutputStream(file))){
+
+            configOut.writeObject(saConfigObject);
         }
     }
-     */
 
     public void parseInput(InputStream in) {
         Scanner sc = new Scanner(in);
@@ -352,7 +349,7 @@ public class GSA {
                 if(state.stream().anyMatch(lr1Item ->
                     lr1Item.getProduction().getLeftSide() == firstNonTerminalSymbol &&
                         lr1Item.getProduction().getRightSide().size() == lr1Item.getDotPosition() &&
-                        lr1Item.getFollowingSymbols().equals(Set.of(EOF_SYMBOL)) &&
+                        lr1Item.getFollowingSymbols().contains(EOF_SYMBOL) &&
                         symbol.equals(EOF_SYMBOL))){
 
                     action = new AcceptAction();
@@ -407,8 +404,6 @@ public class GSA {
                 }
             }
         }
-
-
     }
 
     public Set<TerminalSymbol> getTerminalSymbols() {

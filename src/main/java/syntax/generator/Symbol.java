@@ -1,14 +1,19 @@
 package syntax.generator;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
 
-public abstract class Symbol {
+public abstract class Symbol implements Serializable {
 
     private final String name;
 
 
     protected Symbol(String name) {
+        if(name == null){
+            throw new IllegalArgumentException();
+        }
+
         this.name = name;
     }
 
@@ -27,7 +32,7 @@ public abstract class Symbol {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Symbol symbol = (Symbol) o;
-        return name.equals(symbol.name);
+        return Objects.equals(name, symbol.name);
     }
 
     @Override

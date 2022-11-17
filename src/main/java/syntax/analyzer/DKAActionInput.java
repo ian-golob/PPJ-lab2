@@ -2,9 +2,10 @@ package syntax.analyzer;
 
 import syntax.generator.TerminalSymbol;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class DKAActionInput {
+public class DKAActionInput implements Serializable {
 
     private final int state;
 
