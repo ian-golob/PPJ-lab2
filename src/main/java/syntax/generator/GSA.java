@@ -1,5 +1,7 @@
 package syntax.generator;
 
+import syntax.analyzer.*;
+
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,9 +18,12 @@ public class GSA {
 
     private final Map<DKATransitionInput, Set<LR1Item>> dkaTransitions = new HashMap<>();
 
+    private final Map<DKAActionInput, Action> dkaActionTable = new HashMap<>();
+    private final Map<DKANewStateInput, Integer> dkaNewStateTable = new HashMap<>();
+
     private List<Set<LR1Item>> states;
 
-    private final static TerminalSymbol EOF_SYMBOL = new TerminalSymbol("!EOF!");
+    public final static TerminalSymbol EOF_SYMBOL = new TerminalSymbol("!EOF!");
 
     public static void main(String... args) {
         GSA gla = new GSA();
@@ -78,6 +83,9 @@ public class GSA {
 
         // Izracun tranzicija DKA
         calculateDKATransitions();
+
+        // Izracun tablica Akcija i NovoStanje
+        calculateDKATables();
 
     }
 
@@ -162,13 +170,10 @@ public class GSA {
 
     private void calculateEmptySymbols() {
 
-        int emptySymbolCount = 0;
-
         for(NonTerminalSymbol symbol: nonTerminalSymbols){
             for(Production production: symbol.getProductions()) {
                 if (production.isEpsilon()) {
                     symbol.setIsEmptySymbol(true);
-                    emptySymbolCount++;
                 }
             }
         }
@@ -278,14 +283,16 @@ public class GSA {
     }
 
     private void calculateDKATransitions() {
-        Set<Set<LR1Item>> stateSet = new HashSet<>();
+        states = new ArrayList<>();
         List<Set<LR1Item>> statesToProcess = new ArrayList<>();
 
         Set<LR1Item> firstState = new HashSet<>();
         for(Production production: firstNonTerminalSymbol.getProductions()){
             firstState.addAll(SAUtil.getAllEpsilonLR1Items(new LR1Item(production, Set.of(EOF_SYMBOL))));
         }
-        statesToProcess.add(SAUtil.joinDuplicateLR1Items(firstState));
+        firstState = SAUtil.joinDuplicateLR1Items(firstState);
+        statesToProcess.add(firstState);
+        states.add(firstState);
 
         do{
             Set<LR1Item> stateToProcess = statesToProcess.get(0);
@@ -316,10 +323,9 @@ public class GSA {
 
                 stateOutput = SAUtil.joinDuplicateLR1Items(stateOutput);
 
-                if(!stateSet.contains(stateOutput)){
+                if(!states.contains(stateOutput)){
                     statesToProcess.add(stateOutput);
-                    stateSet.add(stateOutput);
-                    System.out.println(stateSet.size());
+                    states.add(stateOutput);
                 }
 
                 dkaTransitions.put(new DKATransitionInput(stateToProcess, symbol), stateOutput);
@@ -328,6 +334,80 @@ public class GSA {
             //DKATransitionInput transitionInput = new DKATransitionInput(stateToProcess, nextSymbol);
 
         } while (statesToProcess.size() != 0);
+
+    }
+
+    private void calculateDKATables() {
+        List<TerminalSymbol> terminalSymbolList = new ArrayList<>(terminalSymbols.stream().toList());
+        terminalSymbolList.add(EOF_SYMBOL);
+
+        for(int i = 0; i < states.size(); i++){
+            for(int j = 0; j < terminalSymbolList.size(); j ++){
+                Set<LR1Item> state = states.get(i);
+                TerminalSymbol symbol = terminalSymbolList.get(j);
+
+                Action action;
+                DKATransitionInput dkaTransitionInput = new DKATransitionInput(state, symbol);
+
+                if(state.stream().anyMatch(lr1Item ->
+                    lr1Item.getProduction().getLeftSide() == firstNonTerminalSymbol &&
+                        lr1Item.getProduction().getRightSide().size() == lr1Item.getDotPosition() &&
+                        lr1Item.getFollowingSymbols().equals(Set.of(EOF_SYMBOL)) &&
+                        symbol.equals(EOF_SYMBOL))){
+
+                    action = new AcceptAction();
+
+                } else if(dkaTransitions.containsKey(dkaTransitionInput)){
+
+                    action = new MoveAction(states.indexOf(dkaTransitions.get(dkaTransitionInput)));
+
+                } else {
+
+                    Production firstReducableProduction = null;
+
+                    for(LR1Item lr1Item: state){
+
+                        if((lr1Item.getProduction().isEpsilon() || lr1Item.getDotPosition() == lr1Item.getProduction().getRightSide().size()) &&
+                                lr1Item.getFollowingSymbols().contains(symbol) &&
+                                (firstReducableProduction == null || (firstReducableProduction.getPriority() > lr1Item.getProduction().getPriority()))){
+                            firstReducableProduction = lr1Item.getProduction();
+                        }
+
+                    }
+
+                    if(firstReducableProduction != null){
+                        action = new ReduceAction(firstReducableProduction);
+                    } else {
+                        action = new RejectAction();
+                    }
+                }
+
+                DKAActionInput input = new DKAActionInput(i, symbol);
+                dkaActionTable.put(input, action);
+            }
+        }
+
+
+        List<NonTerminalSymbol> nonTerminalSymbolList = nonTerminalSymbols.stream().toList();
+        for(int i = 0; i < states.size(); i++){
+            for(int j = 0; j < nonTerminalSymbolList.size(); j ++){
+                Set<LR1Item> state = states.get(i);
+                NonTerminalSymbol symbol = nonTerminalSymbolList.get(j);
+                DKANewStateInput input = new DKANewStateInput(i, symbol);
+
+                DKATransitionInput dkaTransitionInput = new DKATransitionInput(state, symbol);
+                if(dkaTransitions.containsKey(dkaTransitionInput)){
+
+                    dkaNewStateTable.put(input, states.indexOf(dkaTransitions.get(dkaTransitionInput)));
+
+                } else {
+
+                    dkaNewStateTable.put(input, null);
+
+                }
+            }
+        }
+
 
     }
 
@@ -355,10 +435,19 @@ public class GSA {
         return (NonTerminalSymbol) symbols.get(name);
     }
 
-    public Set<Set<LR1Item>> getStates() {
-        Collection<Set<LR1Item>> valueSet = dkaTransitions.values();
-        Set<Set<LR1Item>> result = dkaTransitions.keySet().stream().map(DKATransitionInput::getState).collect(Collectors.toSet());
-        result.addAll(valueSet);
-        return result;
+    public List<Set<LR1Item>> getStates() {
+        return states;
+    }
+
+    public Map<DKATransitionInput, Set<LR1Item>> getDkaTransitions() {
+        return dkaTransitions;
+    }
+
+    public Map<DKAActionInput, Action> getDkaActionTable() {
+        return dkaActionTable;
+    }
+
+    public Map<DKANewStateInput, Integer> getDkaNewStateTable() {
+        return dkaNewStateTable;
     }
 }

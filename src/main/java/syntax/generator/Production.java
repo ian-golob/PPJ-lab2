@@ -54,7 +54,8 @@ public class Production {
         }
 
         return leftSide + " -> "
-                + rightSideString;
+                + rightSideString + " => "
+                + priority;
     }
 
     @Override
