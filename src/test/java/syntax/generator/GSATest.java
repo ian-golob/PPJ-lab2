@@ -2,8 +2,8 @@ package syntax.generator;
 
 import org.junit.jupiter.api.Test;
 import syntax.common.Action;
-import syntax.analyzer.DKAActionInput;
-import syntax.analyzer.DKANewStateInput;
+import syntax.analyzer.ActionInput;
+import syntax.analyzer.NewStateInput;
 import syntax.common.NonTerminalSymbol;
 import syntax.common.Production;
 import syntax.common.TerminalSymbol;
@@ -12,7 +12,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class GSATest {
 
@@ -90,7 +89,7 @@ public class GSATest {
             for(int j = 0; j < terminalSymbolList.size(); j ++){
 
                 TerminalSymbol symbol = terminalSymbolList.get(j);
-                DKAActionInput input = new DKAActionInput(i, symbol);
+                ActionInput input = new ActionInput(i, symbol);
 
                 Action action = gsa.getDkaActionTable().get(input);
                 System.out.print(String.format("%" + fieldLength + "s", action));
@@ -113,7 +112,7 @@ public class GSATest {
             for(int j = 0; j < nonTerminalSymbolList.size(); j ++){
 
                 NonTerminalSymbol symbol = nonTerminalSymbolList.get(j);
-                DKANewStateInput input = new DKANewStateInput(i, symbol);
+                NewStateInput input = new NewStateInput(i, symbol);
 
                 Integer output = gsa.getDkaNewStateTable().get(input);
 

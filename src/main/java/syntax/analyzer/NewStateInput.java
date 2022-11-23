@@ -1,17 +1,17 @@
 package syntax.analyzer;
 
-import syntax.common.TerminalSymbol;
+import syntax.common.NonTerminalSymbol;
 
 import java.io.Serializable;
 import java.util.Objects;
 
-public class DKAActionInput implements Serializable {
+public class NewStateInput implements Serializable {
 
     private final int state;
 
-    private final TerminalSymbol symbol;
+    private final NonTerminalSymbol symbol;
 
-    public DKAActionInput(int state, TerminalSymbol symbol) {
+    public NewStateInput(int state, NonTerminalSymbol symbol) {
         this.state = state;
         this.symbol = symbol;
     }
@@ -20,7 +20,7 @@ public class DKAActionInput implements Serializable {
         return state;
     }
 
-    public TerminalSymbol getSymbol() {
+    public NonTerminalSymbol getSymbol() {
         return symbol;
     }
 
@@ -28,8 +28,8 @@ public class DKAActionInput implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DKAActionInput dkaInput = (DKAActionInput) o;
-        return state == dkaInput.state && Objects.equals(symbol, dkaInput.symbol);
+        NewStateInput that = (NewStateInput) o;
+        return state == that.state && symbol.equals(that.symbol);
     }
 
     @Override
@@ -37,4 +37,3 @@ public class DKAActionInput implements Serializable {
         return Objects.hash(state, symbol);
     }
 }
-

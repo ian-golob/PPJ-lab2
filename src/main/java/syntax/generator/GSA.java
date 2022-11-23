@@ -21,8 +21,8 @@ public class GSA {
 
     private final Map<DKATransitionInput, Set<LR1Item>> dkaTransitions = new HashMap<>();
 
-    private final Map<DKAActionInput, Action> dkaActionTable = new HashMap<>();
-    private final Map<DKANewStateInput, Integer> dkaNewStateTable = new HashMap<>();
+    private final Map<ActionInput, Action> dkaActionTable = new HashMap<>();
+    private final Map<NewStateInput, Integer> dkaNewStateTable = new HashMap<>();
 
     private List<Set<LR1Item>> states;
 
@@ -382,7 +382,7 @@ public class GSA {
                     }
                 }
 
-                DKAActionInput input = new DKAActionInput(i, symbol);
+                ActionInput input = new ActionInput(i, symbol);
                 dkaActionTable.put(input, action);
             }
         }
@@ -392,7 +392,7 @@ public class GSA {
             for(int j = 0; j < nonTerminalSymbolList.size(); j ++){
                 Set<LR1Item> state = states.get(i);
                 NonTerminalSymbol symbol = nonTerminalSymbolList.get(j);
-                DKANewStateInput input = new DKANewStateInput(i, symbol);
+                NewStateInput input = new NewStateInput(i, symbol);
 
                 DKATransitionInput dkaTransitionInput = new DKATransitionInput(state, symbol);
                 if(dkaTransitions.containsKey(dkaTransitionInput)){
@@ -440,11 +440,11 @@ public class GSA {
         return dkaTransitions;
     }
 
-    public Map<DKAActionInput, Action> getDkaActionTable() {
+    public Map<ActionInput, Action> getDkaActionTable() {
         return dkaActionTable;
     }
 
-    public Map<DKANewStateInput, Integer> getDkaNewStateTable() {
+    public Map<NewStateInput, Integer> getDkaNewStateTable() {
         return dkaNewStateTable;
     }
 }

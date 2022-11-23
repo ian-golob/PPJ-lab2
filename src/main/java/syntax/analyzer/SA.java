@@ -16,8 +16,8 @@ public class SA {
     // Config objects
     private Map<String, Symbol> symbols;
     private NonTerminalSymbol firstNonTerminalSymbol;
-    private Map<DKAActionInput, Action> dkaActionTable;
-    private Map<DKANewStateInput, Integer> dkaNewStateTable;
+    private Map<ActionInput, Action> actionTable;
+    private Map<NewStateInput, Integer> newStateTable;
 
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
@@ -36,8 +36,8 @@ public class SA {
 
             symbols = saConfigObject.getSymbols();
             firstNonTerminalSymbol = saConfigObject.getFirstNonTerminalSymbol();
-            dkaActionTable = saConfigObject.getDkaActionTable();
-            dkaNewStateTable = saConfigObject.getDkaNewStateTable();
+            actionTable = saConfigObject.getDkaActionTable();
+            newStateTable = saConfigObject.getDkaNewStateTable();
 
         }
     }
