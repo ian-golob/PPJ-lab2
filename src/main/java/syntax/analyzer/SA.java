@@ -73,7 +73,7 @@ public class SA {
             } else if (action.getType() == ActionType.REDUCE){
                 var reduceAction = (ReduceAction) action;
                 var right = reduceAction.getProduction().getRightSide();
-                if (currentSymbol == EOF_SYMBOL) Collections.reverse(right);
+                //if (currentSymbol == EOF_SYMBOL) Collections.reverse(right);
                 output.println(reduceAction + " " + reduceAction.getProduction().getLeftSide() + " " + right);
                 var nodes = right == null ?
                         List.of(new LRStackNode(0, new TerminalSymbol("$"), -1)) :

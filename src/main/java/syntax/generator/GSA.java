@@ -27,6 +27,7 @@ public class GSA {
     private List<Set<LR1Item>> states;
 
     public final static TerminalSymbol EOF_SYMBOL = new TerminalSymbol("!EOF!");
+    public final static NonTerminalSymbol Q0_SYMBOL = new NonTerminalSymbol("<Q0>");
 
     public static void main(String... args) throws IOException {
         GSA gla = new GSA();
@@ -134,6 +135,9 @@ public class GSA {
     }
 
     private void inputProductions(Scanner sc) {
+
+        Q0_SYMBOL.getProductions().add(new Production(0, Q0_SYMBOL, List.of(firstNonTerminalSymbol)));
+        firstNonTerminalSymbol = Q0_SYMBOL;
 
         String firstLeftSide = sc.nextLine();
         NonTerminalSymbol leftSide = getNonTerminalSymbol(firstLeftSide);
