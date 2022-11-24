@@ -351,7 +351,8 @@ public class GSA {
 
                 if(state.stream().anyMatch(lr1Item ->
                     lr1Item.getProduction().getLeftSide() == firstNonTerminalSymbol &&
-                        lr1Item.getProduction().getRightSide().size() == lr1Item.getDotPosition() &&
+                        (lr1Item.getProduction().isEpsilon() ||
+                                lr1Item.getProduction().getRightSide().size() == lr1Item.getDotPosition()) &&
                         lr1Item.getFollowingSymbols().contains(EOF_SYMBOL) &&
                         symbol.equals(EOF_SYMBOL))){
 
