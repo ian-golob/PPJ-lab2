@@ -60,20 +60,20 @@ public class SA {
             } else currentSymbol = EOF_SYMBOL;
 
             stack.print(output);
-            //output.println(currentState);
+            output.println(currentState);
 
             var action = actionTable.get(new ActionInput(currentState, currentSymbol));
 
             if (action.getType() == ActionType.MOVE){
                 var moveAction = (MoveAction) action;
-                output.println(moveAction);
+                //output.println(moveAction);
                 currentState = moveAction.getNextState();
                 stack.move(currentSymbol, currentState, -1);
                 i++;
             } else if (action.getType() == ActionType.REDUCE){
                 var reduceAction = (ReduceAction) action;
                 var right = reduceAction.getProduction().getRightSide();
-                if (currentSymbol == EOF_SYMBOL) Collections.reverse(right);
+                //if (currentSymbol == EOF_SYMBOL) Collections.reverse(right);
                 output.println(reduceAction + " " + reduceAction.getProduction().getLeftSide() + " " + right);
                 var nodes = right == null ?
                         List.of(new LRStackNode(0, new TerminalSymbol("$"), -1)) :
