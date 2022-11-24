@@ -46,6 +46,7 @@ public class LRStack {
             if (!node.symbol.getName().equals(symbol.getName())) return null;
             nodes.add(node);
         }
+        Collections.reverse(rightSide);
         Collections.reverse(nodes);
         return nodes;
     }

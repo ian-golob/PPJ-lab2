@@ -59,8 +59,8 @@ public class SA {
                 currentSymbol = lines.get(i).getSymbol();
             } else currentSymbol = EOF_SYMBOL;
 
-            stack.print(output);
-            output.println(currentState);
+            //stack.print(output);
+            //output.println(currentState);
 
             var action = actionTable.get(new ActionInput(currentState, currentSymbol));
 
@@ -73,8 +73,7 @@ public class SA {
             } else if (action.getType() == ActionType.REDUCE){
                 var reduceAction = (ReduceAction) action;
                 var right = reduceAction.getProduction().getRightSide();
-                //if (currentSymbol == EOF_SYMBOL) Collections.reverse(right);
-                output.println(reduceAction + " " + reduceAction.getProduction().getLeftSide() + " " + right);
+                //output.println(reduceAction + " " + reduceAction.getProduction().getLeftSide() + " " + right);
                 var nodes = right == null ?
                         List.of(new LRStackNode(0, new TerminalSymbol("$"), -1)) :
                         stack.remove(right);
@@ -85,9 +84,11 @@ public class SA {
                 currentState = newStateTable.get(new NewStateInput(stack.topState(), (NonTerminalSymbol) reduceAction.getProduction().getLeftSide()));
                 tree.addNode(terminalSymbolCount, nodes);
                 stack.move(reduceAction.getProduction().getLeftSide(), currentState, terminalSymbolCount++);
-                //tree.print(output);
+
             } else if (action.getType() == ActionType.ACCEPT){
                 tree.setRoot(stack.topSymbol(), terminalSymbolCount-1);
+                //output.println(stack.topSymbol() + " " + (terminalSymbolCount-1));
+                //tree.print(output);
                 tree.traverse(output);
                 break;
             }

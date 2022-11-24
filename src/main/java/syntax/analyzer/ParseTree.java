@@ -48,7 +48,8 @@ public class ParseTree {
     private void traverseNode(int index, int depth, PrintStream output){
         for (var child : leaves.get(index)){
             indent(depth, output);
-            if (child.index == -1){
+            if (child.symbol.getName().equals("$")) output.println("$");
+            else if (child.index == -1){
                 output.println(lines.get(nextLineIndex++).getText());
             }
             else {

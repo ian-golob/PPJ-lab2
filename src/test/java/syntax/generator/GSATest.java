@@ -20,7 +20,7 @@ public class GSATest {
         GSA gsa = new GSA();
 
 
-        try(FileInputStream inputStream = new FileInputStream("./src/test/resources/simpler-example.txt")){
+        try(FileInputStream inputStream = new FileInputStream("./src/test/resources/test-examples/00aab_1/test.san")){
             gsa.parseInput(inputStream);
         }
 
