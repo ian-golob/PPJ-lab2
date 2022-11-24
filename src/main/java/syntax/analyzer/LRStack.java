@@ -4,6 +4,7 @@ import syntax.common.NonTerminalSymbol;
 import syntax.common.Production;
 import syntax.common.Symbol;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +26,13 @@ public class LRStack {
         return stack.peek().symbol;
     }
 
+    public void print(PrintStream output){
+        for (var el : stack){
+            output.print(el.symbol + " ");
+        }
+        output.println();
+    }
+
     public void move(Symbol symbol, int state, int index){
         stack.push(new LRStackNode(state, symbol, index));
     }
@@ -35,7 +43,7 @@ public class LRStack {
         if (rightSide.size() >= stack.size()) return null;
         for (Symbol symbol : rightSide) {
             LRStackNode node = stack.pop();
-            if (node.symbol != symbol) return null;
+            if (!node.symbol.getName().equals(symbol.getName())) return null;
             nodes.add(node);
         }
         Collections.reverse(nodes);

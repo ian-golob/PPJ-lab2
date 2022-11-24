@@ -6,6 +6,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -58,22 +59,33 @@ public class SA {
                 currentSymbol = lines.get(i).getSymbol();
             } else currentSymbol = EOF_SYMBOL;
 
+            stack.print(output);
+            //output.println(currentState);
+
             var action = actionTable.get(new ActionInput(currentState, currentSymbol));
 
             if (action.getType() == ActionType.MOVE){
                 var moveAction = (MoveAction) action;
+                output.println(moveAction);
                 currentState = moveAction.getNextState();
                 stack.move(currentSymbol, currentState, -1);
                 i++;
             } else if (action.getType() == ActionType.REDUCE){
                 var reduceAction = (ReduceAction) action;
-                var nodes = reduceAction.getProduction().isEpsilon() ?
+                var right = reduceAction.getProduction().getRightSide();
+                if (currentSymbol == EOF_SYMBOL) Collections.reverse(right);
+                output.println(reduceAction + " " + reduceAction.getProduction().getLeftSide() + " " + right);
+                var nodes = right == null ?
                         List.of(new LRStackNode(0, new TerminalSymbol("$"), -1)) :
-                        stack.remove(reduceAction.getProduction().getRightSide());
-                if (nodes == null) return; //oporavak od pogreške tu
+                        stack.remove(right);
+                if (nodes == null) {
+                    output.print("Oporavak");
+                    return;
+                }
                 currentState = newStateTable.get(new NewStateInput(stack.topState(), (NonTerminalSymbol) reduceAction.getProduction().getLeftSide()));
                 tree.addNode(terminalSymbolCount, nodes);
                 stack.move(reduceAction.getProduction().getLeftSide(), currentState, terminalSymbolCount++);
+                //tree.print(output);
             } else if (action.getType() == ActionType.ACCEPT){
                 tree.setRoot(stack.topSymbol(), terminalSymbolCount-1);
                 tree.traverse(output);

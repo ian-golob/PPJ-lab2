@@ -19,6 +19,15 @@ public class ParseTree {
         leaves = new HashMap<>();
     }
 
+    public void print(PrintStream output){
+        for (int i = 0; i < leaves.size(); i++){
+            for (var leaf : leaves.get(i)){
+                output.print(leaf.symbol + " " + leaf.index + " ");
+            }
+            output.println();
+        }
+    }
+
     public void addNode(int index, List<LRStackNode> symbols){
         leaves.put(index, symbols);
     }
@@ -50,15 +59,6 @@ public class ParseTree {
     }
 
     public void traverse(PrintStream output) {
-
-        for (var pair : leaves.entrySet()){
-            output.println(pair.getKey() + ": ");
-            for (var node : pair.getValue()) {
-                output.print(node.index);
-                output.println(node.symbol);
-            }
-        }
-
         nextLineIndex = 0;
         output.println(rootSymbol);
         traverseNode(rootIndex, 1, output);
