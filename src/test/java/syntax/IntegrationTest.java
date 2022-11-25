@@ -18,19 +18,20 @@ public class IntegrationTest {
 
     @ParameterizedTest
     @MethodSource("provideTestDirectoryNames")
-    public void integrationTest(String directoryName) throws IOException, ClassNotFoundException {
+    public void integrationTest(String directoryName) throws IOException, ClassNotFoundException, InterruptedException {
         String pathPrefix = "./src/test/resources/test-examples/";
 
         String sanFileName = pathPrefix + directoryName + "/test.san";
         String inFileName = pathPrefix + directoryName + "/test.in";
         String outFileName = pathPrefix + directoryName + "/test.out";
         String myFileName = pathPrefix + directoryName + "/test.my";
+        String objFileName = pathPrefix + directoryName + "/config.obj";
 
         //run generator
         GSA gsa = new GSA();
         try(InputStream in = new FileInputStream(sanFileName)){
             gsa.parseInput(in);
-            gsa.writeSAConfigObjects();
+            gsa.writeSAConfigObjects(objFileName);
         }
 
         //run analyzer
@@ -38,7 +39,7 @@ public class IntegrationTest {
             PrintStream output = new PrintStream(new FileOutputStream(myFileName))){
 
             SA sa = new SA();
-            sa.readSAConfigObject();
+            sa.readSAConfigObject(objFileName);
 
             sa.analyzeInput(input, output);
         }

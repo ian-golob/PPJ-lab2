@@ -5,6 +5,7 @@ import syntax.common.*;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,32 +27,35 @@ public class GSA {
 
     private List<Set<LR1Item>> states;
 
-    public final static TerminalSymbol EOF_SYMBOL = new TerminalSymbol("!EOF!");
-    public final static NonTerminalSymbol Q0_SYMBOL = new NonTerminalSymbol("<Q0>");
+    public final TerminalSymbol EOF_SYMBOL = new TerminalSymbol("!EOF!");
+    public final NonTerminalSymbol Q0_SYMBOL = new NonTerminalSymbol("<Q0>");
+
 
     public static void main(String... args) throws IOException {
         GSA gla = new GSA();
         gla.parseInput(System.in);
-        gla.writeSAConfigObjects();
+        gla.writeSAConfigObjects("./analizator/saConfigObject.obj");
     }
 
-    public void writeSAConfigObjects() throws IOException {
+    public void writeSAConfigObjects(String pathString) throws IOException {
 
         SAConfigObject saConfigObject = new SAConfigObject(
                 symbols,
                 firstNonTerminalSymbol,
                 dkaActionTable,
                 dkaNewStateTable);
-        File file = new File("./analizator/saConfigObject.obj");
+        Path configPath = Path.of(pathString);
 
         Files.createDirectories(Paths.get("analizator/"));
-        file.createNewFile();
+        Files.deleteIfExists(configPath);
+        Files.createFile(configPath);
 
         try(ObjectOutputStream configOut =
                 new ObjectOutputStream(
-                        new FileOutputStream(file))){
+                        new FileOutputStream(configPath.toFile()))){
 
             configOut.writeObject(saConfigObject);
+            configOut.flush();
         }
     }
 

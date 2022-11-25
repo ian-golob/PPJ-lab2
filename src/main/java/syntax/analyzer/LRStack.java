@@ -5,10 +5,7 @@ import syntax.common.Production;
 import syntax.common.Symbol;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 public class LRStack {
     private Stack<LRStackNode> stack;
@@ -49,5 +46,17 @@ public class LRStack {
         Collections.reverse(rightSide);
         Collections.reverse(nodes);
         return nodes;
+    }
+
+    @Override
+    public String toString() {
+
+        StringBuilder result = new StringBuilder();
+
+        for (LRStackNode node : stack) {
+            result.append(node.symbol.toString()).append(node.state);
+        }
+
+        return result.toString();
     }
 }

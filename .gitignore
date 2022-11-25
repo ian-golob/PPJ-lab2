@@ -144,3 +144,4 @@ replay_pid*
 
 /analizator/*.obj
 *.my
+/src/test/resources/**/*.obj

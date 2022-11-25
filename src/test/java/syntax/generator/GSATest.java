@@ -71,7 +71,7 @@ public class GSATest {
          */
 
         List<TerminalSymbol> terminalSymbolList = new ArrayList<>(gsa.getTerminalSymbols());
-        terminalSymbolList.add(GSA.EOF_SYMBOL);
+        terminalSymbolList.add(gsa.EOF_SYMBOL);
         List<NonTerminalSymbol> nonTerminalSymbolList = new ArrayList<>(gsa.getNonTerminalSymbols());
 
 
