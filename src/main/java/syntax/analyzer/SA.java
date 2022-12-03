@@ -5,6 +5,7 @@ import syntax.common.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -62,7 +63,7 @@ public class SA {
             //stack.print(output);
             //output.println(currentState);
 
-            System.out.println(stack.toString());
+            //System.out.println(stack.toString());
 
             var action = actionTable.get(new ActionInput(currentState, currentSymbol));
 
@@ -70,33 +71,49 @@ public class SA {
                 var moveAction = (MoveAction) action;
                 //output.println(moveAction);
                 currentState = moveAction.getNextState();
-                stack.move(currentSymbol, currentState, -1);
+                stack.move(new LRStackNode(currentState, currentSymbol, i, true));
                 i++;
             } else if (action.getType() == ActionType.REDUCE){
                 var reduceAction = (ReduceAction) action;
                 var right = reduceAction.getProduction().getRightSide();
                 //output.println(reduceAction + " " + reduceAction.getProduction().getLeftSide() + " " + right);
                 var nodes = right == null ?
-                        List.of(new LRStackNode(0, new TerminalSymbol("$"), -1)) :
+                        List.of(new LRStackNode(0, new TerminalSymbol("$"), -1, true)) :
                         stack.remove(right);
-                if (nodes == null) {
-                    output.print("Oporavak");
-                    return;
-                }
-                currentState = newStateTable.get(new NewStateInput(stack.topState(), (NonTerminalSymbol) reduceAction.getProduction().getLeftSide()));
-                tree.addNode(terminalSymbolCount, nodes);
-                stack.move(reduceAction.getProduction().getLeftSide(), currentState, terminalSymbolCount++);
+                currentState = newStateTable.get(new NewStateInput(stack.topNode().state, (NonTerminalSymbol) reduceAction.getProduction().getLeftSide()));
+                tree.addNode(nodes);
+                stack.move(new LRStackNode(currentState, reduceAction.getProduction().getLeftSide(), terminalSymbolCount++, false));
 
             } else if (action.getType() == ActionType.ACCEPT){
-                tree.setRoot(stack.topSymbol(), terminalSymbolCount-1);
+                tree.setRoot(stack.topNode().symbol, terminalSymbolCount-1);
                 //output.println(stack.topSymbol() + " " + (terminalSymbolCount-1));
                 //tree.print(output);
                 tree.traverse(output);
                 break;
             }
             else{
-                output.println("Syntax error");
-                break;
+                System.out.println("Sintaksna greška u liniji " + (i+1));
+                System.out.print("Očekivani uniformni znakovi: ");
+                for (Symbol symbol : symbols.values()) {
+                    if (symbol instanceof TerminalSymbol &&
+                            actionTable.get(new ActionInput(currentState, (TerminalSymbol) symbol)).getType() != ActionType.REJECT){
+                        System.out.print(symbol + " ");
+                    }
+                }
+                System.out.println();
+                System.out.println("Pročitani uniformni znak: " + currentSymbol);
+                System.out.println("Odgovarajući izvorni kod uniformong znaka: " + lines.get(i).getText());
+
+                while (i < lines.size() && !(currentSymbol = (TerminalSymbol) lines.get(i).getSymbol()).isSyncSymbol()){
+                    tree.addLineSkip(i++);
+                }
+                if (i >= lines.size()) currentSymbol = EOF_SYMBOL;
+                while (actionTable.get(new ActionInput(currentState, currentSymbol)).getType() == ActionType.REJECT){
+                    var topNode = stack.topNode();
+                    if (topNode.isTerminal) tree.addLineSkip(topNode.index);
+                    stack.remove(List.of(topNode.symbol));
+                    currentState = stack.topNode().state;
+                }
             }
         }
     }

@@ -15,7 +15,7 @@ public class Line{
         int secondSpace = firstSpace + 1 + line.substring(firstSpace + 1).indexOf(' ');
         symbol = (TerminalSymbol) symbols.get(line.substring(0, firstSpace));
         number = Integer.parseInt(line.substring(firstSpace + 1, secondSpace));
-        text = line;
+        text = line.substring(secondSpace + 1);
     }
 
     public int getNumber() {

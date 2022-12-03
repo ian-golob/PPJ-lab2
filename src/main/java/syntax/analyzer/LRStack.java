@@ -12,15 +12,11 @@ public class LRStack {
 
     public LRStack(){
         stack = new Stack<>();
-        stack.push(new LRStackNode(0, new NonTerminalSymbol("bottom"), -1));
+        stack.push(new LRStackNode(0, new NonTerminalSymbol("bottom"), -1, false));
     }
 
-    public int topState(){
-        return stack.peek().state;
-    }
-
-    public Symbol topSymbol(){
-        return stack.peek().symbol;
+    public LRStackNode topNode(){
+        return stack.peek();
     }
 
     public void print(PrintStream output){
@@ -30,22 +26,26 @@ public class LRStack {
         output.println();
     }
 
-    public void move(Symbol symbol, int state, int index){
-        stack.push(new LRStackNode(state, symbol, index));
+    public void move(LRStackNode node){
+        stack.push(node);
     }
 
     public List<LRStackNode> remove(List<Symbol> rightSide) {
+        boolean error = false;
         Collections.reverse(rightSide);
         List<LRStackNode> nodes = new ArrayList<>();
         if (rightSide.size() >= stack.size()) return null;
         for (Symbol symbol : rightSide) {
             LRStackNode node = stack.pop();
-            if (!node.symbol.getName().equals(symbol.getName())) return null;
             nodes.add(node);
         }
         Collections.reverse(rightSide);
         Collections.reverse(nodes);
         return nodes;
+    }
+
+    public int size(){
+        return stack.size();
     }
 
     @Override
