@@ -9,7 +9,8 @@ import syntax.generator.GSA;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,15 +18,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class IntegrationTest {
 
     @ParameterizedTest
-    @MethodSource("provideTestDirectoryNames")
-    public void integrationTest(String directoryName) throws IOException, ClassNotFoundException, InterruptedException {
-        String pathPrefix = "./src/test/resources/test-examples/";
+    @MethodSource("provideNewTestDirectoryNames")
+    public void integrationTest(String directoryName) throws IOException, ClassNotFoundException {
+        String pathPrefix = "./src/test/resources/" + directoryName;
 
-        String sanFileName = pathPrefix + directoryName + "/test.san";
-        String inFileName = pathPrefix + directoryName + "/test.in";
-        String outFileName = pathPrefix + directoryName + "/test.out";
-        String myFileName = pathPrefix + directoryName + "/test.my";
-        String objFileName = pathPrefix + directoryName + "/config.obj";
+        String sanFileName = pathPrefix + "/test.san";
+        String inFileName = pathPrefix + "/test.in";
+        String outFileName = pathPrefix + "/test.out";
+        String myFileName = pathPrefix + "/test.my";
+        String objFileName = pathPrefix + "/config.obj";
 
         //run generator
         GSA gsa = new GSA();
@@ -50,11 +51,24 @@ public class IntegrationTest {
         assertEquals(normalizeString(correctOutput), normalizeString(myOutput));
     }
 
-    private static Stream<Arguments> provideTestDirectoryNames() {
 
-        File[] directories = new File("./src/test/resources/test-examples").listFiles(File::isDirectory);
+    private static Stream<Arguments> provideNewTestDirectoryNames() {
 
-        return Arrays.stream(directories).map(File::getName).map(Arguments::of);
+        File[] directoriesNew = new File("./src/test/resources/test-examples").listFiles(File::isDirectory);
+        File[] directories1112 = new File("./src/test/resources/test-examples-11-12").listFiles(File::isDirectory);
+
+        List<String> args = new ArrayList<>();
+
+        for(File file: directoriesNew){
+            args.add("test-examples/"+file.getName());
+        }
+
+        for(File file: directories1112){
+            args.add("test-examples-11-12/"+file.getName());
+        }
+
+
+        return args.stream().map(Arguments::of);
     }
 
     public static String normalizeString(String s){
